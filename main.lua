@@ -1,4 +1,4 @@
---- gcs-yazi: Browse, preview, and navigate Google Cloud Storage from yazi.
+--- gcs-browser: Browse, preview, and navigate Google Cloud Storage from yazi.
 ---
 --- Subcommands (via keymap.toml):
 ---   (none)     - Browse GCS buckets / refresh current dir (gs)
@@ -20,7 +20,7 @@ local GCS_TMP = "/tmp/yazi-gcs"
 
 -- Defaults; overridden by setup()
 M._gcloud = "gcloud"
-M._preview_bytes = 800
+M._preview_bytes = 2048
 M._download_dir = nil -- defaults to ~/Downloads
 
 ---------------------------------------------------------------------------
@@ -117,7 +117,7 @@ end
 --- Populate a local temp directory with one level of GCS listing.
 --- Returns the parsed lines on success, nil on failure.
 local function populate(local_dir, gs_path)
-	ya.err("gcs-yazi: populate " .. local_dir .. " <- " .. gs_path)
+	ya.err("gcs-browser: populate " .. local_dir .. " <- " .. gs_path)
 	local out = gcloud({ "storage", "ls", gs_path })
 
 	if not out then
@@ -162,7 +162,7 @@ local function populate(local_dir, gs_path)
 		Command("sh"):arg({ "-c", table.concat(cmds, " && ") }):output()
 	end
 
-	ya.err("gcs-yazi: created " .. count .. " items in " .. local_dir)
+	ya.err("gcs-browser: created " .. count .. " items in " .. local_dir)
 	return lines
 end
 
@@ -253,7 +253,7 @@ end
 
 ---------------------------------------------------------------------------
 -- setup(): Header indicator + auto-populate on cd
--- Called from init.lua: require("gcs-yazi"):setup()
+-- Called from init.lua: require("gcs-browser"):setup()
 ---------------------------------------------------------------------------
 
 function M:setup(opts)
@@ -314,7 +314,7 @@ function M:entry(job)
 		-- Skip if directory already has contents (e.g. navigating back)
 		if dir_has_contents(auto_dir) then return end
 
-		ya.err("gcs-yazi: auto-populate " .. auto_dir)
+		ya.err("gcs-browser: auto-populate " .. auto_dir)
 		ya.notify({ title = "GCS", content = "Loading...", timeout = 2 })
 		local gs_path = to_gcs_path(auto_dir)
 		local lines = populate(auto_dir, gs_path)
@@ -328,7 +328,7 @@ function M:entry(job)
 	end
 
 	-- Manual entry: either refresh (if in GCS) or fresh browse (if not)
-	ya.err("gcs-yazi: === entry ===")
+	ya.err("gcs-browser: === entry ===")
 	local cwd_url = get_cwd()
 	local cwd = tostring(cwd_url)
 
@@ -380,7 +380,7 @@ function M:entry(job)
 		ya.emit("cd", { Url(local_dir) }) -- refresh after lookahead
 	end
 
-	ya.err("gcs-yazi: === done ===")
+	ya.err("gcs-browser: === done ===")
 end
 
 ---------------------------------------------------------------------------
@@ -398,7 +398,7 @@ function M:peek(job)
 	ya.preview_widget(job, { ui.Text("Loading " .. gs_path .. " ..."):area(job.area) })
 
 	-- Fetch file content from GCS
-	local range = "0-" .. tostring(M._preview_bytes or 800)
+	local range = "0-" .. tostring(M._preview_bytes or 2048)
 	local out = Command(M._gcloud)
 		:arg({ "storage", "cat", "-r", range, gs_path })
 		:stdout(Command.PIPED):stderr(Command.PIPED):output()

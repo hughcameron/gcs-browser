@@ -1,4 +1,4 @@
-# gcs-yazi
+# gcs-browser
 
 Browse, preview, and navigate Google Cloud Storage from [yazi](https://yazi-rs.github.io/).
 
@@ -19,7 +19,7 @@ are auto-populated as you enter them.
 - **Header indicator** — shows `☁ gs://bucket/path/` on the right side of the header
 - **Auto-populate** — entering a subdirectory fetches its contents from GCS
 - **Look-ahead** — subdirectories are pre-populated so folder preview works
-- **File preview** — preview pane shows the first N bytes of GCS objects (configurable)
+- **File preview** — preview pane shows the first N bytes of GCS objects (default: 2048, configurable)
 - **Loading states** — "Loading..." shown in preview pane and notifications during fetch
 
 ## Requirements
@@ -31,7 +31,7 @@ are auto-populated as you enter them.
 ## Installation
 
 ```sh
-ya pack -a hughcameron/gcs-yazi
+ya pack -a hughcameron/gcs-browser
 ```
 
 ## Configuration
@@ -41,17 +41,17 @@ ya pack -a hughcameron/gcs-yazi
 Add the setup call to `~/.config/yazi/init.lua`:
 
 ```lua
-require("gcs-yazi"):setup()
+require("gcs-browser"):setup()
 ```
 
 With options:
 
 ```lua
-require("gcs-yazi"):setup({
+require("gcs-browser"):setup({
     -- Override gcloud path if not in PATH (default: "gcloud")
     gcloud_path = "/opt/homebrew/bin/gcloud",
-    -- Bytes to fetch for file preview (default: 800)
-    preview_bytes = 2048,
+    -- Bytes to fetch for file preview (default: 2048)
+    preview_bytes = 4096,
     -- Download directory (default: ~/Downloads)
     download_dir = os.getenv("HOME") .. "/Downloads",
 })
@@ -65,7 +65,7 @@ Register the previewer for GCS temp files in `~/.config/yazi/yazi.toml`:
 [plugin]
 prepend_previewers = [
     # ... your other previewers ...
-    { url = "/tmp/yazi-gcs/**", run = "gcs-yazi" },
+    { url = "/tmp/yazi-gcs/**", run = "gcs-browser" },
 ]
 ```
 
@@ -77,22 +77,22 @@ Add keybindings to `~/.config/yazi/keymap.toml`:
 # GCS bucket browser
 [[mgr.prepend_keymap]]
 on   = ["g", "s"]
-run  = "plugin gcs-yazi"
+run  = "plugin gcs-browser"
 desc = "Browse GCS buckets / refresh"
 
 [[mgr.prepend_keymap]]
 on   = ["c", "g"]
-run  = "plugin gcs-yazi -- copy"
+run  = "plugin gcs-browser -- copy"
 desc = "Copy gs:// path"
 
 [[mgr.prepend_keymap]]
 on   = ["g", "d"]
-run  = "plugin gcs-yazi -- download"
+run  = "plugin gcs-browser -- download"
 desc = "Download GCS file to ~/Downloads"
 
 [[mgr.prepend_keymap]]
 on   = ["g", "q"]
-run  = "plugin gcs-yazi -- exit"
+run  = "plugin gcs-browser -- exit"
 desc = "Exit GCS browser"
 ```
 
